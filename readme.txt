@@ -1,7 +1,3 @@
-ECM3408 Enterprise Computing Continuous Assessment 2019-20
-Candidate number: 089004
-
-
 1.  Microservice Identification
 
 For realising the e-mail delivery service, there are three microservices required which can be seen below. It is important to note that for each server, there will be an MSA and MTA. The BBS server is accessible by all servers and is crucial in linking them all together.
@@ -14,7 +10,6 @@ The MTA uses the MSA to read and delete a message from the user’s outbox, then
 
 - Blue Book Server (BBS)
 The BBS keeps track of all the network addresses for the email servers. These may be obtained by supplying the BBS with the source or destination address of an email message, and it will return the network address. This essentially ties each network together, allowing the MTA to send emails.
-
 
 
 2.  Microservice Implementation
@@ -43,7 +38,7 @@ Independent
 
 Please find below the best order to run the executables in, in order for them to function correctly.
 
-1)  Submission/start_network.sh
+1)  start_network.sh
 2)  Here/msa/run.sh
 3)  Here/mta/run.sh
 4)  Here/mta/run_updater.sh (optional)
@@ -66,16 +61,3 @@ The MSA can also take calls to view the outbox, inbox, all emails, a single emai
 The MTA can send and receive emails – both can be called using a GET or POST request, respectively.
 
 The BBS can be called to find an MSA/MTA address, it can share a list of all servers that it knows, it can create a server, return one server, update a server or delete a server from its storage.
-
-
-Docker problems that were overcome(!):
-
-The problem:
-Unfortunately, I ran into a rather large error when running the docker containers on my Mac. All three docker containers function, with building and running not being a problem at all. A problem does occur however when running the http://localhost:3001/send GET request - this GET request activates the push method within the MTA, which makes another GET request to http://localhost:3000/outbox/emails , which returns the emails sitting in the outbox ready to be sent. I can only replicate this error when the Docker containers are activated. Strangely, when running the three .go files on my computer locally, they work fine and there are no issues when making the GET requests as noted above. Similarly, the issue does not happen when running Docker containers for the MSA and BBS, with the MTA running locally.
-
-I tried changing the ports that the Mux router runs on for all files, closing docker containers, restarting my computer/docker etc, as well as writing completely new docker containers for blank files, adding mux routing capabilities with some methods to call Get requests on and I still got the same error. At this point I was very unsure what else to try and was quite frustrated to say the least!
-
-How I overcame the problem:
-After a lot of testing and digging, I realised that I had not set up a network to connect my docker containers to. After learning more about how networks are created and how they work, I created one to connect them all to. After that didn’t quite work how I thought it would, I then started testing docker network commands, which led me to realise that my ports weren’t forwarding how I thought they would either. Again, after some more digging I realised that I could not simply call ‘http://localhost:3000’ from within my golang microservice (MTA, MSA etc) to communicate with another of my microservices. Slowly I realised that a specific IP address was required so that I could set each microservice up to communicate with each other properly. From there, everything seemed to work well.
-
-To conclude, it is possible to create two email servers from the code I have supplied (here.com and there.com), and you are able to send and receive emails between the two. I have also included a lot of error handling and messages, as these are very useful for both production and testing scenarios. Further, I have provided bash scripts to set up the docker network, create the images and run the containers, as well as the regular send email checker(s) contained in the bash scripts.
